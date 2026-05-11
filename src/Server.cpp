@@ -62,30 +62,116 @@ void    Server::init()
     this->_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (_serverSocket == -1)
         throw std::runtime_error("Error: Unable to create socket");
-    //cree le socket/fd
     
     int opt = 1;
     if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
         throw std::runtime_error("Error: setsockopt failed (Adress could be already in use)");
-    //permet de reutilise l'adresse si jamais le serveur doit redemarrer car par defaut il est bloque apres redemarrage
-    if (fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1)
         throw std::runtime_error("Error: fcntl failed");
-    //permet de rendre le serveur non bloquant
     
     struct sockaddr_in serverAddr;
     std::memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_port = htons(_port);
-
-    //creer une structure avec l'adresse pour lier le socket a l'adresse
     
     if (bind(_serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1)
         throw std::runtime_error("Error: Unable to bind socket");
 
-    //permet de d'ecouter sur le port, ce socket ne peut donc pas communiquer mais permet d'ecouter les requetes
     if (listen(_serverSocket, 10) == -1)
         throw std::runtime_error("Error: Unable to listen on socket");
 
     std::cout << "Port is listening on port " << _port << std::endl;
+}
+
+void    Server::run()
+{
+    struct pollfd serverPoll
+    serverPoll.fd = _serversSocket;
+    serverPoll.events = POLLIN;
+    this->_fds.push_back(serverPoll);
+
+    std::cout << "Server is running..." << std::endl;
+    while (true)
+    {
+        int pollCount = poll(_fds.data(), _fds.size(), 1000);
+        if (pollCOunt == -1)
+            throw std::runtime_error("Error: poll() failed");
+        
+        for (size_t i = 0; i < _fds.size(); i++)
+        {
+            if (_fds[i].revents == 0)
+                continue;
+            
+                if(i == 0 && (_fds[i].revents & POLLIN))
+                {
+                    acceptNewClient();
+                }
+                else if(_fds[i].revents & POLLIN)
+                {
+                    handleClientData(_fds[i].fd);
+                }
+        }
+    }
+}
+
+void Server::acceptNewClient()
+{
+    struct sockaddr_in clientAddr;
+    socklen_t clientAddrLen = sizeof(clientAddr);
+
+    int clientFd = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddr, &clientAddrLen);
+    if (clientFd == -1)
+    {
+        std::cerr << "Error: accept() failed";
+        return;
+    }
+    if (fcntl(clientFd, F_SETFL, O_NONBLOCK) == -1)
+    {
+        std::cerr << "Error: fcntl() failed for client socket" << std::endl;
+        close(clientFd);
+        return;
+    }
+
+    std::string ipAddr = inet_ntoa(clientAddr.sin_addr);
+    _clients[clientFd] = Client(clientFd, ipAddr);
+
+    struct pollfd clientPoll;
+    clientPoll.fd = clientFd;
+    clientPoll.events = POLLIN;
+    this->_fds.push_back(clientPoll)
+
+    std::cout << "New client connected: " << ipAddr << std::endl;
+}
+
+void Server::handleClientData(int clientFd)
+{
+    char buffer[512];
+    ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) -1, 0);
+
+    if (bytesRead <= 0)
+    {
+        disconnectClient(clientFd);
+        return;
+    }
+    buffer[bytesRead] = '\0';
+
+    //A faire: Ajouter les donnes au buffer du client
+    
+    //A Faire: Parser les commandes IRC
+}
+
+void Server::disconnectClient(int clientFd)
+{
+    close (clientFd);
+    _clients.erase(clientFd);
+
+    for (size_t i = 1; i < _fds.size(); i++)
+    {
+        if (_fds[i].fd == clientFd)
+        {
+            _fds.erase(_fds.begin + i);
+            break;
+        }
+    }
+    std::cout << "Client disconnected (fd: " << clientFd << std::endl;
 }

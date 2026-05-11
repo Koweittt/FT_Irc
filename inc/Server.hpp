@@ -36,6 +36,8 @@ class Server
         int         getPort();
         std::string getPass();
         void        init();
+        void        run();
+        void        acceptNewClient();
         
     private:
         Server();
