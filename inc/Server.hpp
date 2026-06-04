@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/25 11:53:13 by koweit            #+#    #+#             */
-/*   Updated: 2026/04/30 18:03:41 by koweit           ###   ########.fr       */
+/*   Updated: 2026/06/04 05:39:15 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ class Server
         void        init();
         void        run();
         void        acceptNewClient();
+        void        handleClientData(int ClientFd);
+        void        disconnectClient(int ClientFd);
         
     private:
         Server();

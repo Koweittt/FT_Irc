@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/26 11:45:34 by koweit            #+#    #+#             */
-/*   Updated: 2026/04/30 17:47:14 by koweit           ###   ########.fr       */
+/*   Updated: 2026/06/04 05:50:22 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,9 +65,10 @@ void    Server::init()
     
     int opt = 1;
     if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+    {
         throw std::runtime_error("Error: setsockopt failed (Adress could be already in use)");
-        throw std::runtime_error("Error: fcntl failed");
-    
+    }
+
     struct sockaddr_in serverAddr;
     std::memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
@@ -85,8 +86,8 @@ void    Server::init()
 
 void    Server::run()
 {
-    struct pollfd serverPoll
-    serverPoll.fd = _serversSocket;
+    struct pollfd serverPoll;
+    serverPoll.fd = _serverSocket;
     serverPoll.events = POLLIN;
     this->_fds.push_back(serverPoll);
 
@@ -94,7 +95,7 @@ void    Server::run()
     while (true)
     {
         int pollCount = poll(_fds.data(), _fds.size(), 1000);
-        if (pollCOunt == -1)
+        if (pollCount == -1)
             throw std::runtime_error("Error: poll() failed");
         
         for (size_t i = 0; i < _fds.size(); i++)
@@ -102,14 +103,14 @@ void    Server::run()
             if (_fds[i].revents == 0)
                 continue;
             
-                if(i == 0 && (_fds[i].revents & POLLIN))
-                {
-                    acceptNewClient();
-                }
-                else if(_fds[i].revents & POLLIN)
-                {
-                    handleClientData(_fds[i].fd);
-                }
+            if(i == 0 && (_fds[i].revents & POLLIN))
+            {
+                acceptNewClient();
+            }
+            else if(_fds[i].revents & POLLIN)
+            {
+                handleClientData(_fds[i].fd);
+            }
         }
     }
 }
@@ -119,7 +120,7 @@ void Server::acceptNewClient()
     struct sockaddr_in clientAddr;
     socklen_t clientAddrLen = sizeof(clientAddr);
 
-    int clientFd = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddr, &clientAddrLen);
+    int clientFd = accept(_serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
     if (clientFd == -1)
     {
         std::cerr << "Error: accept() failed";
@@ -133,12 +134,12 @@ void Server::acceptNewClient()
     }
 
     std::string ipAddr = inet_ntoa(clientAddr.sin_addr);
-    _clients[clientFd] = Client(clientFd, ipAddr);
+    _clients.insert(std::make_pair(clientFd, Client(clientFd, ipAddr)));
 
     struct pollfd clientPoll;
     clientPoll.fd = clientFd;
     clientPoll.events = POLLIN;
-    this->_fds.push_back(clientPoll)
+    this->_fds.push_back(clientPoll);
 
     std::cout << "New client connected: " << ipAddr << std::endl;
 }
@@ -155,9 +156,17 @@ void Server::handleClientData(int clientFd)
     }
     buffer[bytesRead] = '\0';
 
-    //A faire: Ajouter les donnes au buffer du client
-    
-    //A Faire: Parser les commandes IRC
+    _clients[clientFd].getBuffer() += buffer;
+
+    std::string &buf = _clients[clientFd].getBuffer();
+    size_t pos;
+    while((pos = buf.find("\r\n")) != std::string::npos)
+    {
+        std::string line = buf.substr(0, pos);
+        buf.erase(0, pos + 2);
+        //Parser et executer 'line'
+        std::cout << "Commande recue " << line << std::endl;
+    }
 }
 
 void Server::disconnectClient(int clientFd)
@@ -169,9 +178,9 @@ void Server::disconnectClient(int clientFd)
     {
         if (_fds[i].fd == clientFd)
         {
-            _fds.erase(_fds.begin + i);
+            _fds.erase(_fds.begin() + i);
             break;
         }
     }
-    std::cout << "Client disconnected (fd: " << clientFd << std::endl;
+    std::cout << "Client disconnected (fd: " << clientFd << ")" << std::endl;
 }

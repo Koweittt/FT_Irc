@@ -18,6 +18,7 @@ int main()
     {
         Server myServer(6667, "1234");
         myServer.init();
+        myServer.run();
     }
     catch (const std::exception &e)
     {

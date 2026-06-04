@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/26 11:49:45 by koweit            #+#    #+#             */
-/*   Updated: 2026/04/30 18:03:14 by koweit           ###   ########.fr       */
+/*   Updated: 2026/06/04 06:02:46 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,15 @@ class Client
 {
     public:
         Client(int fd, const std::string& ipAddr);
-        ~Client();
-        
-    private:
-        Client(); 
         Client(const Client& src);
+        ~Client();
         Client& operator=(const Client& src);
+
+        std::string&    getBuffer();
+        // void            clearBuffer(size_t len);
+
+    private:
+        Client();
 
         bool        _isRegistered;
         int         _fd;

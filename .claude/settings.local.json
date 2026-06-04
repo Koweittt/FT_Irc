@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree -L 3 -a //wsl.localhost/wsl2/home/koweit/FT_Irc)",
+      "Read(///wsl.localhost/wsl2/home/koweit/**)",
+      "Bash(find //wsl.localhost/wsl2/home/koweit/FT_Irc -maxdepth 2 -type f \\\\\\( -name \"README*\" -o -name \"*.md\" -o -name \"subject*\" \\\\\\))",
+      "Bash(wc -l //wsl.localhost/wsl2/home/koweit/FT_Irc/src/*.cpp //wsl.localhost/wsl2/home/koweit/FT_Irc/inc/*.hpp)",
+      "Read(///wsl.localhost/wsl2/home/koweit/FT_Irc/src/**)",
+      "Bash(grep -n \"serversSocket\\\\|pollCOunt\\\\|clientAddrLen\\\\|\\\\.erase\\\\|error\\\\|;\" //wsl.localhost/wsl2/home/koweit/FT_Irc/src/Server.cpp | head -30)",
+      "Bash(make)",
+      "Bash(cd /mnt/wsl2/home/koweit/FT_Irc && make 2>&1)",
+      "Read(//mnt/wsl2/home/koweit/**)",
+      "Bash(wsl -e bash -c \"cd ~/FT_Irc && make 2>&1\")",
+      "Bash(wsl -d wsl2 -u koweit -e bash -c \"cd ~/FT_Irc && make 2>&1\")"
+    ]
+  }
+}
