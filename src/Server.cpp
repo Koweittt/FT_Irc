@@ -156,9 +156,10 @@ void Server::handleClientData(int clientFd)
     }
     buffer[bytesRead] = '\0';
 
-    _clients[clientFd].getBuffer() += buffer;
+    Client& client = _clients.find(clientFd)->second;
+    client.getBuffer() += buffer;
 
-    std::string &buf = _clients[clientFd].getBuffer();
+    std::string &buf = client.getBuffer();
     size_t pos;
     while((pos = buf.find("\r\n")) != std::string::npos)
     {
