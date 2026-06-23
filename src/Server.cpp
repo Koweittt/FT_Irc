@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: trambure <trambure@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/26 11:45:34 by koweit            #+#    #+#             */
-/*   Updated: 2026/06/04 05:50:22 by marvin           ###   ########.fr       */
+/*   Updated: 2026/06/23 15:57:48 by trambure         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
+#include "../inc/Command.hpp"
 #include <stdexcept>
 #include <cstring>
 #include <arpa/inet.h> 
@@ -165,8 +166,9 @@ void Server::handleClientData(int clientFd)
     {
         std::string line = buf.substr(0, pos);
         buf.erase(0, pos + 2);
-        //Parser et executer 'line'
-        std::cout << "Commande recue " << line << std::endl;
+        
+        command cmd(line);
+        executeCommand(cmd, client, *this);
     }
 }
 

@@ -10,8 +10,15 @@ SRCS        = $(SRC_DIR)/main.cpp \
               $(SRC_DIR)/Server.cpp \
               $(SRC_DIR)/Client.cpp \
               $(SRC_DIR)/Channel.cpp \
+              $(SRC_DIR)/commands/command.cpp \
+              $(SRC_DIR)/commands/dispatcher.cpp \
+              $(SRC_DIR)/commands/pass.cpp \
+              $(SRC_DIR)/commands/nick.cpp \
+              $(SRC_DIR)/commands/user.cpp \
               $(SRC_DIR)/commands/join.cpp \
               $(SRC_DIR)/commands/privmsg.cpp \
+              $(SRC_DIR)/commands/part.cpp \
+              $(SRC_DIR)/commands/quit.cpp \
               $(SRC_DIR)/commands/kick.cpp \
               $(SRC_DIR)/commands/invite.cpp \
               $(SRC_DIR)/commands/topic.cpp \

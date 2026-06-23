@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   kick.cpp                                           :+:      :+:    :+:   */
+/*   part.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: trambure <trambure@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -15,19 +15,18 @@
 #include "../inc/Server.hpp"
 #include <sys/socket.h>
 
-void handleKick(const command &cmd, Client &client, Server &server)
+void handlePart(const command &cmd, Client &client, Server &server)
 {
 	(void)server;
 
-	if (cmd.getParameterCount() < 2)
+	if (cmd.getParameterCount() < 1)
 	{
-		std::string response = "461 " + client.getNickname() + " KICK :Not enough parameters\r\n";
+		std::string response = "461 " + client.getNickname() + " PART :Not enough parameters\r\n";
 		send(client.getFd(), response.c_str(), response.length(), 0);
 		return;
 	}
 
 	std::string channel = cmd.getParameter(0);
-	std::string target = cmd.getParameter(1);
-	std::string response = ":" + client.getNickname() + " KICK " + channel + " " + target + "\r\n";
+	std::string response = ":" + client.getNickname() + " PART " + channel + "\r\n";
 	send(client.getFd(), response.c_str(), response.length(), 0);
 }
