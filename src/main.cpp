@@ -6,17 +6,23 @@
 /*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/26 11:42:43 by koweit            #+#    #+#             */
-/*   Updated: 2026/04/30 14:27:30 by koweit           ###   ########.fr       */
+/*   Updated: 2026/06/24 01:58:30 by koweit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
+#include <cstdlib>
 
-int main()
+int main(int argc, char **argv)
 {
+    if (argc != 3)
+    {
+        std::cerr << "Usage: ./ircserv <port> <password>" << std::endl;
+        return (1);
+    }
     try
     {
-        Server myServer(6667, "1234");
+        Server myServer(std::atoi(argv[1]), argv[2]);
         myServer.init();
         myServer.run();
     }
