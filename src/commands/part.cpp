@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   part.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: trambure <trambure@student.42.fr>          +#+  +:+       +#+        */
+/*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/23 00:00:00 by student           #+#    #+#             */
-/*   Updated: 2026/06/23 15:44:36 by trambure         ###   ########.fr       */
+/*   Updated: 2026/06/26 01:50:13 by koweit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,16 +17,30 @@
 
 void handlePart(const command &cmd, Client &client, Server &server)
 {
-	(void)server;
-
 	if (cmd.getParameterCount() < 1)
 	{
 		std::string response = "461 " + client.getNickname() + " PART :Not enough parameters\r\n";
 		send(client.getFd(), response.c_str(), response.length(), 0);
 		return;
 	}
+	if (server.getChannels().find(cmd.getParameter(0)) == server.getChannels().end())
+	{
+		std::string response = "403: Channel doesn't exist\r\n";
+		send(client.getFd(), response.c_str(), response.length(), 0);
+		return;
+	}
+	Channel& channel = server.getChannels()[cmd.getParameter(0)];
+	if (channel.isMember(client.getFd()) == false)
+	{
+		std::string response = "442: User is not member\r\n";
+		send(client.getFd(), response.c_str(), response.length(), 0);
+		return;
+	}
+	
+	std::string message = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getIpAddr() + " PART " + channel.getName() + "\r\n";
+	channel.broadcast(message, -1);
+	channel.removeMember(client.getFd());
+	if (channel.getMemberCount() == 0)
+		server.getChannels().erase(channel.getName());
 
-	std::string channel = cmd.getParameter(0);
-	std::string response = ":" + client.getNickname() + " PART " + channel + "\r\n";
-	send(client.getFd(), response.c_str(), response.length(), 0);
 }

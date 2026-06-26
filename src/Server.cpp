@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: trambure <trambure@student.42.fr>          +#+  +:+       +#+        */
+/*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/26 11:45:34 by koweit            #+#    #+#             */
-/*   Updated: 2026/06/23 15:57:48 by trambure         ###   ########.fr       */
+/*   Updated: 2026/06/25 22:43:14 by koweit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,4 +186,19 @@ void Server::disconnectClient(int clientFd)
         }
     }
     std::cout << "Client disconnected (fd: " << clientFd << ")" << std::endl;
+}
+
+std::string Server::getPass() const
+{
+    return this->_pass;
+}
+
+std::map<int, Client>& Server::getClients()
+{
+    return this->_clients;
+}
+
+std::map<std::string, Channel>& Server::getChannels()
+{
+    return this->_channels;
 }

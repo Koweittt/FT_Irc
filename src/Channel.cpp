@@ -6,7 +6,7 @@
 /*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/24 02:19:22 by koweit            #+#    #+#             */
-/*   Updated: 2026/06/24 03:37:26 by koweit           ###   ########.fr       */
+/*   Updated: 2026/06/26 00:47:56 by koweit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,4 +150,9 @@ void Channel::broadcast(std::string message, int exceptFd)
             send(it->first, message.c_str(), message.length(), 0);
         ++it;
     }
+}
+
+std::map<int, Client*>& Channel::getMembers()
+{
+    return this->_members;
 }

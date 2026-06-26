@@ -6,7 +6,7 @@
 /*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/26 11:50:47 by koweit            #+#    #+#             */
-/*   Updated: 2026/06/24 03:33:46 by koweit           ###   ########.fr       */
+/*   Updated: 2026/06/26 00:47:38 by koweit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ class Channel
         int         getMemberCount() const;
         void        removeMember(int fd);
         void        addMember(Client* client);
+        std::map<int, Client*>& getMembers();
         
         //Operator
         void addOperator(int fd);
