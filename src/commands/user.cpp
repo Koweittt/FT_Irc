@@ -21,26 +21,26 @@ void handleUser(const command &cmd, Client &client, Server &server)
 
 	if (cmd.getParameterCount() < 4)
 	{
-		std::string response = "461 USER :Not enough parameters\r\n";
+		std::string response = ":server 461 * USER :Not enough parameters\r\n";
 		send(client.getFd(), response.c_str(), response.length(), 0);
 		return;
 	}
 
 	std::string username = cmd.getParameter(0);
-	
+
 	if (client.hasPassword() == false)
 	{
-		std::string response = "464 " + username + " have no password\r\n";
+		std::string response = ":server 464 * :Password required\r\n";
 		send(client.getFd(), response.c_str(), response.length(), 0);
 		return;
 	}
 
 	client.setUsername(username);
 
-	if (client.hasPassword() && client.hasNickname() && client.hasUsername())
+	if (client.hasPassword() && client.hasNickname() && client.hasUsername() && !client.isRegistered())
 	{
 		client.setRegistered(true);
-		std::string response = "001 " + client.getNickname() + " :Welcome to IRC\r\n";
+		std::string response = ":server 001 " + client.getNickname() + " :Welcome to IRC\r\n";
 		send(client.getFd(), response.c_str(), response.length(), 0);
 	}
 }

@@ -19,14 +19,14 @@ void handleJoin(const command &cmd, Client &client, Server &server)
 {
 	if (cmd.getParameterCount() < 1)
 	{
-		std::string response = "461 " + client.getNickname() + " JOIN :Not enough parameters\r\n";
+		std::string response = ":server 461 " + client.getNickname() + " JOIN :Not enough parameters\r\n";
 		send(client.getFd(), response.c_str(), response.length(), 0);
 		return;
 	}
 
 	if (client.isRegistered() == false)
 	{
-		std::string response = "451 :You have not registered\r\n";
+		std::string response = ":server 451 " + client.getNickname() + " :You have not registered\r\n";
 		send(client.getFd(), response.c_str(), response.length(), 0);
 		return;
 	}
@@ -42,7 +42,7 @@ void handleJoin(const command &cmd, Client &client, Server &server)
 		{
 			if (channel.isInvited(client.getFd()) == false)
 			{
-				std::string response = "473 :You are not invited to this channel\r\n";
+				std::string response = ":server 473 " + client.getNickname() + " " + channelName + " :Cannot join channel (+i)\r\n";
 				send(client.getFd(), response.c_str(), response.length(), 0);
 				return;
 			}
@@ -51,7 +51,7 @@ void handleJoin(const command &cmd, Client &client, Server &server)
 		{
 			if (channel.getKey() != cmd.getParameter(1))
 			{
-				std::string response = "475 :Bad channel key\r\n";
+				std::string response = ":server 475 " + client.getNickname() + " " + channelName + " :Cannot join channel (+k)\r\n";
 				send(client.getFd(), response.c_str(), response.length(), 0);
 				return;
 			}	
@@ -60,7 +60,7 @@ void handleJoin(const command &cmd, Client &client, Server &server)
 		{
 			if (channel.getMemberCount() >= channel.getUserLimit())
 			{
-				std::string response = "471 :Too much user in channel\r\n";
+				std::string response = ":server 471 " + client.getNickname() + " " + channelName + " :Cannot join channel (+l)\r\n";
 				send(client.getFd(), response.c_str(), response.length(), 0);
 				return;
 			}
@@ -77,8 +77,18 @@ void handleJoin(const command &cmd, Client &client, Server &server)
 		channelPtr = &server.getChannels()[channelName];
 	}
 
-	std::string response = ":" + client.getNickname() + " JOIN " + channelName + "\r\n";
+	std::string response = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getIpAddr() + " JOIN " + channelName + "\r\n";
 	send(client.getFd(), response.c_str(), response.length(), 0);
+	if (channelPtr->getTopic().empty())
+	{
+		std::string msg331 = ":server 331 " + client.getNickname() + " " + channelName + " :No topic is set\r\n";
+		send(client.getFd(), msg331.c_str(), msg331.length(), 0);
+	}
+	else
+	{
+		std::string msg332 = ":server 332 " + client.getNickname() + " " + channelName + " :" + channelPtr->getTopic() + "\r\n";
+		send(client.getFd(), msg332.c_str(), msg332.length(), 0);
+	}
 	std::string names = "";
 	std::map<int, Client*>::iterator it = channelPtr->getMembers().begin();
 	while(it != channelPtr->getMembers().end())

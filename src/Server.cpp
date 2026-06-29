@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: abignals <abignals@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/26 11:45:34 by koweit            #+#    #+#             */
-/*   Updated: 2026/06/25 22:43:14 by koweit           ###   ########.fr       */
+/*   Updated: 2026/06/29 00:13:48 by abignals         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,15 @@
 #include "../inc/Command.hpp"
 #include <stdexcept>
 #include <cstring>
-#include <arpa/inet.h> 
+#include <arpa/inet.h>
+#include <csignal>
+
+volatile sig_atomic_t g_running = 1;
+
+static void handleSignal(int)
+{
+    g_running = 0;
+}
 
 Server::Server()
 {
@@ -37,7 +45,7 @@ Server& Server::operator=(const Server& src)
     return (*this);
 }
 
-Server::Server(int port, std::string pass)
+Server::Server(int port, std::string pass) : _serverSocket(-1)
 {
     this->_port = port;
     this->_pass = pass;
@@ -48,15 +56,6 @@ Server::~Server()
     if (_serverSocket != -1)
         close(_serverSocket);
 }
-
-//socket(IPV4(AF_INET) ou IPV6(AF_INET6), Protocole TCP(SOCK_STREAM) ou UDP(SOCK_DGRAM))
-//Permet de transformer un fd en prise Pour communiquer en reseau, specifier le type d'IP et le protocole utilise
-
-//setsockopt() permet de modifier les options de notre socket, en l'occurence cela lui permet de redemarrer sur le meme port
-
-//pour l'adresse ip on peut utiliser inet_pton, dans ce cas la on a utilise uniquement INADDR_ANY qui est equivalent a 0.0.0.0 pour ouvrir a n'importe quelle IP de la machine locale 127.0.0.1 ou 192.168.x.x
-
-//fcntl rend le serveur non bloquant, permet de renvoyer une erreur inoffensive au client et donc de poursuivre les requetes, modifie directement nos fd
 
 void    Server::init()
 {
@@ -87,23 +86,33 @@ void    Server::init()
 
 void    Server::run()
 {
+    struct sigaction sa;
+    std::memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = handleSignal;
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+
     struct pollfd serverPoll;
     serverPoll.fd = _serverSocket;
     serverPoll.events = POLLIN;
     this->_fds.push_back(serverPoll);
 
     std::cout << "Server is running..." << std::endl;
-    while (true)
+    while (g_running)
     {
         int pollCount = poll(_fds.data(), _fds.size(), 1000);
         if (pollCount == -1)
+        {
+            if (g_running == 0)
+                break;
             throw std::runtime_error("Error: poll() failed");
-        
+        }
+
         for (size_t i = 0; i < _fds.size(); i++)
         {
             if (_fds[i].revents == 0)
                 continue;
-            
+
             if(i == 0 && (_fds[i].revents & POLLIN))
             {
                 acceptNewClient();
@@ -114,6 +123,14 @@ void    Server::run()
             }
         }
     }
+
+    std::cout << "\nServer is shutting down..." << std::endl;
+    for (size_t i = 0; i < _fds.size(); i++)
+        close(_fds[i].fd);
+    _fds.clear();
+    _clients.clear();
+    _channels.clear();
+    _serverSocket = -1;
 }
 
 void Server::acceptNewClient()
@@ -169,12 +186,37 @@ void Server::handleClientData(int clientFd)
         
         command cmd(line);
         executeCommand(cmd, client, *this);
+        if (_clients.find(clientFd) == _clients.end())
+            return;
     }
 }
 
 void Server::disconnectClient(int clientFd)
 {
-    close (clientFd);
+    std::map<int, Client>::iterator clientIt = _clients.find(clientFd);
+    if (clientIt != _clients.end())
+    {
+        Client& client = clientIt->second;
+        std::string quitMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getIpAddr() + " QUIT :Connection closed\r\n";
+
+        std::map<std::string, Channel>::iterator it = _channels.begin();
+        while (it != _channels.end())
+        {
+            if (it->second.isMember(clientFd))
+            {
+                it->second.broadcast(quitMsg, clientFd);
+                it->second.removeMember(clientFd);
+                if (it->second.getMemberCount() == 0)
+                {
+                    _channels.erase(it++);
+                    continue;
+                }
+            }
+            ++it;
+        }
+    }
+
+    close(clientFd);
     _clients.erase(clientFd);
 
     for (size_t i = 1; i < _fds.size(); i++)

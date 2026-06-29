@@ -46,6 +46,7 @@ void handleUser(const command &cmd, Client &client, Server &server);
 // User commands
 void handleJoin(const command &cmd, Client &client, Server &server);
 void handlePrivmsg(const command &cmd, Client &client, Server &server);
+void handleNotice(const command &cmd, Client &client, Server &server);
 void handlePart(const command &cmd, Client &client, Server &server);
 void handleQuit(const command &cmd, Client &client, Server &server);
 

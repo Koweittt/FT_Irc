@@ -34,6 +34,11 @@ void handleQuit(const command &cmd, Client &client, Server &server)
 		{
 			it->second.broadcast(message, client.getFd());
 			it->second.removeMember(client.getFd());
+			if (it->second.getMemberCount() == 0)
+			{
+				server.getChannels().erase(it++);
+				continue;
+			}
 		}
 		++it;
 	}
