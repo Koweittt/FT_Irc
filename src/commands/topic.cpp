@@ -3,12 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   topic.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: abignals <abignals@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/23 00:00:00 by student           #+#    #+#             */
-/*   Updated: 2026/06/26 03:48:20 by koweit           ###   ########.fr       */
+/*   Created: 2026/06/29 16:52:26 by abignals          #+#    #+#             */
+/*   Updated: 2026/06/29 16:52:27 by abignals         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
 
 #include "../inc/Command.hpp"
 #include "../inc/Client.hpp"

@@ -3,12 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   invite.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: koweit <koweit@student.42.fr>              +#+  +:+       +#+        */
+/*   By: abignals <abignals@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/23 00:00:00 by student           #+#    #+#             */
-/*   Updated: 2026/06/26 03:10:15 by koweit           ###   ########.fr       */
+/*   Created: 2026/06/29 16:52:39 by abignals          #+#    #+#             */
+/*   Updated: 2026/06/29 16:52:40 by abignals         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
 
 #include "../inc/Command.hpp"
 #include "../inc/Client.hpp"
